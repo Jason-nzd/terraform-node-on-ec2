@@ -13,34 +13,60 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-southeast-2"
+  region = var.aws_region
 }
 
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
 
 resource "aws_instance" "ec2_server" {
-  ami                    = "ami-018c0195987eb63ee" // Amazon Linux 2023
-  instance_type          = "t2.micro"
-  key_name               = "WellAWSKeyPair"
+  ami                    = var.ami
+  instance_type          = var.instance_type
+  key_name               = var.ssh_key_name
   vpc_security_group_ids = [aws_security_group.sg-web-server.id]
-  user_data              = file("userdata.sh")
+  user_data = templatefile("install_node_git.sh", {
+    git_project_url    = var.git_project_url
+    git_project_folder = element(reverse(split("/", var.git_project_url)), 0)
+  })
   tags = {
-    Name = "Next.js Web Server"
+    Name = var.instance_name
   }
 }
 
-output "instance_public_ip" {
-  description = "Public IP address of the EC2 instance"
-  value       = aws_instance.ec2_server.public_ip
-}
-output "instance_http_address" {
-  description = "Public http address of the EC2 instance"
-  value       = "http://${aws_instance.ec2_server.public_dns}"
-}
-output "scp_cloud_init_log_command" {
-  description = "SCP command to copy the remote cloud-init-output.log - for monitoring userdata status"
-  value       = "scp -i WellAWSKeyPair.pem ec2-user@${aws_instance.ec2_server.public_ip}:/var/log/cloud-init-output.log ec2.log"
-}
-output "ssh_command" {
-  description = "SSH command for connecting to EC2 instance"
-  value       = "ssh -i WellAWSKeyPair.pem ec2-user@${aws_instance.ec2_server.public_ip}"
+resource "aws_security_group" "sg-web-server" {
+  name        = var.security_group_name
+  description = "Allows SSH 22 to specific IP, HTTP 80 & HTTPS 443 to all"
+  tags = {
+    Name = var.security_group_name
+  }
+
+  ingress {
+    from_port   = 22
+    protocol    = "tcp"
+    to_port     = 22
+    cidr_blocks = ["${chomp(data.http.myip.response_body)}/32"]
+  }
+  ingress {
+    from_port   = 80
+    protocol    = "tcp"
+    to_port     = 80
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 443
+    protocol    = "tcp"
+    to_port     = 443
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
