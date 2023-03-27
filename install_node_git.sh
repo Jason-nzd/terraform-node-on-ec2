@@ -16,6 +16,7 @@ npm install -g npm@9.6.2
 echo "Mapping IP Tables - Routing port 3000 to 80"
 sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 3000
 
+cd home/ec2-user
 git clone "${git_project_url}"
 cd "${git_project_folder}"
 
