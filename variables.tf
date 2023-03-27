@@ -22,7 +22,13 @@ variable "instance_type" {
 }
 
 variable "ssh_key_name" {
-  description = "Name of SSH Key to assign to EC2 instance"
+  description = "Name of ssh key pair to assign to EC2 instance"
+  type        = string
+  default     = ""
+}
+
+variable "ssh_key_local_path" {
+  description = "Path to local ssh key"
   type        = string
   default     = ""
 }

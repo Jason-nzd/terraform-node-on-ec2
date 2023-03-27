@@ -10,10 +10,10 @@ output "instance_http_address" {
 
 output "scp_cloud_init_log" {
   description = "SCP command to copy the remote cloud-init-output.log - for monitoring userdata status"
-  value       = "scp -i ${var.ssh_key_name}.pem ec2-user@${aws_instance.ec2_server.public_ip}:/var/log/cloud-init-output.log cloud-init-output.log"
+  value       = "scp -i ${var.ssh_key_local_path}${var.ssh_key_name}.pem ec2-user@${aws_instance.ec2_server.public_ip}:/var/log/cloud-init-output.log . && code cloud-init-output.log"
 }
 
 output "ssh_command" {
   description = "SSH command for connecting to EC2 instance"
-  value       = "ssh -i ${var.ssh_key_name}.pem ec2-user@${aws_instance.ec2_server.public_ip}"
+  value       = "ssh -i ${var.ssh_key_local_path}${var.ssh_key_name}.pem ec2-user@${aws_instance.ec2_server.public_ip}"
 }
