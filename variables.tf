@@ -9,12 +9,6 @@ variable "instance_name" {
   type        = string
 }
 
-variable "ami" {
-  description = "Amazon Machine image to use for EC2 instance"
-  type        = string
-  default     = "ami-018c0195987eb63ee" // Amazon Linux 2023
-}
-
 variable "instance_type" {
   description = "EC2 instance type/size"
   type        = string

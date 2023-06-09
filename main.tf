@@ -1,17 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.59"
-    }
-    http = {
-      source  = "hashicorp/http"
-      version = "~> 3.2.1"
-    }
-  }
-  required_version = ">= 1.4.2"
-}
-
 provider "aws" {
   region = var.aws_region
 }
@@ -20,8 +6,23 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
+data "aws_ami" "latest-amazon-linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+}
+
 resource "aws_instance" "ec2_server" {
-  ami                    = var.ami
+  ami                    = data.aws_ami.latest-amazon-linux.id
   instance_type          = var.instance_type
   key_name               = var.ssh_key_name
   vpc_security_group_ids = [aws_security_group.sg-web-server.id]
