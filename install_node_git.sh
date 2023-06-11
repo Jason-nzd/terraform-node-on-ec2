@@ -1,7 +1,7 @@
 #!/bin/bash
-sudo yum update -y
-sudo yum install git -y
-sudo yum install iptables -y
+sudo dnf update -y
+sudo dnf install git -y
+sudo dnf install iptables -y
 
 echo "Installing Node Version Manager NVM"
 touch ~/.bashrc
