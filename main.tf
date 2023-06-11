@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
@@ -30,6 +26,7 @@ resource "aws_instance" "ec2_server" {
     git_project_url    = var.git_project_url
     git_project_folder = element(reverse(split("/", var.git_project_url)), 0)
   })
+
   tags = {
     Name = var.instance_name
   }
@@ -38,6 +35,7 @@ resource "aws_instance" "ec2_server" {
 resource "aws_security_group" "sg-web-server" {
   name        = var.security_group_name
   description = "Allows SSH 22 to specific IP, HTTP 80 & HTTPS 443 to all"
+
   tags = {
     Name = var.security_group_name
   }
